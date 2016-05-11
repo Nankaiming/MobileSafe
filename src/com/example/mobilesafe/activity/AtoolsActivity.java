@@ -14,6 +14,7 @@ public class AtoolsActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_atools);
 	}
+	//归属地号码查询工具
 	public void numberAddressQuery(View view){
 		startActivity(new Intent(this, AddressActivity.class));
 	}
