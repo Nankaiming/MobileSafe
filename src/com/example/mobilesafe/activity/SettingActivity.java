@@ -11,6 +11,7 @@ import android.view.View.OnClickListener;
 
 import com.example.mobilesafe.R;
 import com.example.mobilesafe.service.AddressService;
+import com.example.mobilesafe.service.CallSafeService;
 import com.example.mobilesafe.utils.ServiceStatusUtils;
 import com.example.mobilesafe.view.SettingClickView;
 import com.example.mobilesafe.view.SettingItemView;
@@ -19,6 +20,7 @@ public class SettingActivity extends Activity {
 	private SettingItemView sivUpdate;
 	private SharedPreferences mPrefs;
 	private SettingItemView siv_address;
+	private SettingItemView siv_black;
 	private SettingClickView scvAddressStyle;
 
 	@Override
@@ -31,6 +33,7 @@ public class SettingActivity extends Activity {
 		initAddressView();
 		initAddressStyle();
 		initAddressLocation();
+		initBlackView();
 	}
 	//设置是否自动更新
 	private void initUpadateView() {
@@ -77,6 +80,34 @@ public class SettingActivity extends Activity {
 					siv_address.setChecked(true);
 					startService(new Intent(SettingActivity.this,
 							AddressService.class));
+				}
+			}
+		});
+	}
+//设置是否开启黑名单拦截
+	private void initBlackView() {
+		siv_black = (SettingItemView) findViewById(R.id.siv_black);
+		boolean isRunning = ServiceStatusUtils.isServiceRunning(this,
+				"com.example.mobilesafe.service.CallSafeService");
+		if (isRunning) {
+			siv_black.setChecked(true);
+		} else {
+			siv_black.setChecked(false);
+		}
+		siv_address.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				// TODO Auto-generated method stub
+				if (siv_black.isChecked()) {
+					siv_black.setChecked(false);
+					stopService(new Intent(SettingActivity.this,
+							CallSafeService.class));
+				} else {
+					siv_black.setChecked(true);
+					startService(new Intent(SettingActivity.this,
+							CallSafeService.class));
 				}
 			}
 		});

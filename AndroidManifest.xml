@@ -18,10 +18,10 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -56,18 +56,26 @@
         <!-- 选择联系人 -->
         <activity android:name="com.example.mobilesafe.activity.ContactActivity" >
         </activity>
-<!--         高级工具 -->
+        <!-- 高级工具 -->
         <activity android:name="com.example.mobilesafe.activity.AtoolsActivity" >
         </activity>
         <!-- 归属地查询 -->
 
         <activity android:name="com.example.mobilesafe.activity.AddressActivity" >
         </activity>
-<!--         拖拽事件 -->
-        <activity android:name="com.example.mobilesafe.activity.DragViewActivity" 
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+        <!-- 拖拽事件 -->
+        <activity
+            android:name="com.example.mobilesafe.activity.DragViewActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
         </activity>
-        
+        <!-- 通信卫士 -->
+        <activity
+            android:name="com.example.mobilesafe.activity.CallSafeActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
+        </activity>
+        <activity android:name="com.example.mobilesafe.activity.CallSafeActivity2" >
+        </activity>
+
         <!-- 开机广播 -->
         <receiver android:name="com.example.mobilesafe.receiver.BootCompletedReceiver" >
             <intent-filter>
@@ -80,11 +88,14 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
-<!-- 定位服务 -->
+        <!-- 定位服务 -->
         <service android:name="com.example.mobilesafe.service.LocationService" >
         </service>
-<!--         归属地查询服务 -->
+        <!-- 归属地查询服务 -->
         <service android:name="com.example.mobilesafe.service.AddressService" >
+        </service>
+        <!-- 黑名单拦截 -->
+        <service android:name="com.example.mobilesafe.service.CallSafeService" >
         </service>
     </application>
 
