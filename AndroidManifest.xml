@@ -22,6 +22,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
 
     <application
         android:allowBackup="true"
@@ -74,6 +75,11 @@
             android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity android:name="com.example.mobilesafe.activity.CallSafeActivity2" >
+        </activity>
+        
+        <!-- 软件管理 -->
+
+        <activity android:name="com.example.mobilesafe.activity.AppManagerActivity" >
         </activity>
 
         <!-- 开机广播 -->

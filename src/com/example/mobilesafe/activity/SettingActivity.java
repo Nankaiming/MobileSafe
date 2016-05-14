@@ -94,7 +94,7 @@ public class SettingActivity extends Activity {
 		} else {
 			siv_black.setChecked(false);
 		}
-		siv_address.setOnClickListener(new OnClickListener() {
+		siv_black.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
