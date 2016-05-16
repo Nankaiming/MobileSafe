@@ -21,6 +21,8 @@ import com.example.mobilesafe.db.dao.BlackNumberDao;
 public class CallSafeService extends Service {
 	private BlackNumberDao dao;
 	private InnerReceiver innerReceiver;
+	private MyListener listener;
+	private TelephonyManager tm;
 	@Override
 	public IBinder onBind(Intent intent) {
 		// TODO Auto-generated method stub
@@ -37,8 +39,8 @@ public class CallSafeService extends Service {
         registerReceiver(innerReceiver, intentFilter);
         
         
-        TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-        MyListener listener = new MyListener();
+        tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+        listener = new MyListener();
         tm.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
 	}
 	class MyListener extends PhoneStateListener{
@@ -128,6 +130,10 @@ public class CallSafeService extends Service {
 	public void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
+		if(listener != null){
+			tm.listen(listener, PhoneStateListener.LISTEN_NONE);
+			listener = null;
+		}
 		unregisterReceiver(innerReceiver);
 	}
 

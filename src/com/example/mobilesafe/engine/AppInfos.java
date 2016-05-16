@@ -28,7 +28,10 @@ public class AppInfos {
 			
 			String sourceDir = packageInfo.applicationInfo.sourceDir;
 			
+			appInfo.setApkPath(sourceDir);
+			
 			File file = new File(sourceDir);
+			
 			
 			long apkSize = file.length();
 			

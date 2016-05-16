@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -114,6 +115,7 @@ public class SplashActivity extends Activity {
 		AlphaAnimation alpha = new AlphaAnimation(0.3f, 1f);
 		alpha.setDuration(2000);
 		rtRoot.startAnimation(alpha);
+		createShortcut();
 
 	}
 
@@ -268,7 +270,7 @@ public class SplashActivity extends Activity {
 		startActivity(intent);
 		finish();
 	}
-
+	//下载最新版本  用xutils框架
 	private void download() {
 		// TODO Auto-generated method stub
 		tvProgress.setVisibility(View.VISIBLE);
@@ -307,6 +309,37 @@ public class SplashActivity extends Activity {
 		}
 
 	}
+	  
+	//创建快捷方式
+	private void createShortcut(){
+		Intent intent = new Intent();
+		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
+		intent.putExtra("duplicate", false);
+		
+		/**
+		 * 1 干什么事情
+		 * 2 你叫什么名字
+		 * 3你长成什么样子
+		 */
+		
+		
+		intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
+		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, "手机卫士");
+		
+		/**
+		 * 这个地方不能使用显示意图
+		 * 必须使用隐式意图
+		 */
+		
+		Intent shortIntent = new Intent();
+		shortIntent.setAction("home.welcome");
+		shortIntent.addCategory("android.intent.category.DEFAULT");
+		
+		
+		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortIntent);
+		sendBroadcast(intent);
+		
+	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -315,6 +348,7 @@ public class SplashActivity extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
+	//拷贝数据库  (归属地查询数据库)
 	private void copyDB(String dbName) {
 		File destFile = new File(getFilesDir(), dbName);
 		if(destFile.exists()){

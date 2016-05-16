@@ -3,6 +3,18 @@ package com.example.mobilesafe.bean;
 import android.graphics.drawable.Drawable;
 
 public class AppInfo {
+	private String apkPath;
+	
+	public String getApkPath() {
+		return apkPath;
+	}
+
+
+	public void setApkPath(String apkPath) {
+		this.apkPath = apkPath;
+	}
+
+
 	private Drawable icon;
 	
 	private String apkName;

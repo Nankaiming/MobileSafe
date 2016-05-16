@@ -23,6 +23,9 @@
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.WRITE_SMS"/>
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
 
     <application
         android:allowBackup="true"
@@ -38,7 +41,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+<!--         主界面 -->
         <activity android:name="com.example.mobilesafe.activity.HomeActivity" >
+            <intent-filter >
+                <action android:name="home.welcome"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
         </activity>
         <!-- 设置中心 -->
         <activity android:name="com.example.mobilesafe.activity.SettingActivity" >
@@ -80,6 +88,10 @@
         <!-- 软件管理 -->
 
         <activity android:name="com.example.mobilesafe.activity.AppManagerActivity" >
+        </activity>
+        <!--  进程管理 -->
+
+        <activity android:name="com.example.mobilesafe.activity.TaskManagerActivity" >
         </activity>
 
         <!-- 开机广播 -->

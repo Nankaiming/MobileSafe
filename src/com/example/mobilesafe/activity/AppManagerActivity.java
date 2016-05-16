@@ -2,6 +2,7 @@ package com.example.mobilesafe.activity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -29,12 +30,14 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mobilesafe.R;
 import com.example.mobilesafe.bean.AppInfo;
 import com.example.mobilesafe.engine.AppInfos;
 import com.lidroid.xutils.ViewUtils;
 import com.lidroid.xutils.view.annotation.ViewInject;
+import com.stericson.RootTools.RootTools;
 
 @SuppressLint("NewApi")
 public class AppManagerActivity extends Activity implements OnClickListener {
@@ -67,7 +70,7 @@ public class AppManagerActivity extends Activity implements OnClickListener {
 		@Override
 		public int getCount() {
 			// TODO Auto-generated method stub
-			return appInfos.size() + 2;
+			return userAppInfos.size() + 1 + systemAppInfos.size() + 1;
 		}
 
 		@Override
@@ -203,7 +206,7 @@ public class AppManagerActivity extends Activity implements OnClickListener {
 	private void initUI() {
 		setContentView(R.layout.activity_app_manager);
 		ViewUtils.inject(this);
-		// 获取到rom内存的运行的剩余空间
+		// 获取到rom内存的的剩余空间
 		long rom_freeSpace = Environment.getDataDirectory().getFreeSpace();
 		// 获取到SD卡的剩余空间
 		long sd_freeSpace = Environment.getExternalStorageDirectory()
@@ -302,10 +305,29 @@ public class AppManagerActivity extends Activity implements OnClickListener {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
 		case R.id.ll_uninstall:
-			Intent uninstall_localIntent = new Intent(
-					"android.intent.action.DELETE", Uri.parse("package:"
-							+ clickAppInfo.getApkPackageName()));
-			startActivity(uninstall_localIntent);
+			//用户应用可以直接删除
+			if (clickAppInfo.isUserApp()) {
+				Intent uninstall_localIntent = new Intent(
+						"android.intent.action.DELETE", Uri.parse("package:"
+								+ clickAppInfo.getApkPackageName()));
+				startActivity(uninstall_localIntent);
+			}else{
+				if(!RootTools.isRootAvailable()){
+					Toast.makeText(this, "卸载系统应用，必须要root权限", 0).show();
+					return ;
+				}
+				try {
+					if(!RootTools.isAccessGiven()){
+						Toast.makeText(this, "请授权手机卫士root权限", 0).show();
+						return ;
+					}
+					RootTools.sendShell("mount -o remount ,rw /system", 3000);
+					RootTools.sendShell("rm -r "+clickAppInfo.getApkPath(), 30000);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			popupWindowDismiss();
 			break;
 		case R.id.ll_start:

@@ -1,6 +1,6 @@
 package com.example.mobilesafe.utils;
 
-import android.content.Context;
+import android.app.Activity;
 import android.widget.Toast;
 /**
  * 弹吐司的工具类 
@@ -8,7 +8,16 @@ import android.widget.Toast;
  *
  */
 public class ToastUtils {
-	public static void showToast(Context context,String text){
-		Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+	public static void showToast(final Activity context,final String text){
+		if("main".equals(Thread.currentThread().getName())){
+			Toast.makeText(context, text, 0).show();
+		}else{
+			context.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					Toast.makeText(context, text, 0).show();
+				}
+			});
+		}
 	}
 }

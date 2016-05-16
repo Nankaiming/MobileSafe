@@ -70,6 +70,11 @@ public class HomeActivity extends Activity {
 				case 2:
 					startActivity(new Intent(HomeActivity.this,AppManagerActivity.class));
 					break;
+					// 进程管理
+				case 3:
+					startActivity(new Intent(HomeActivity.this,TaskManagerActivity.class));
+					break;
+					
 				// 高级工具
 				case 7:
 					startActivity(new Intent(HomeActivity.this,
