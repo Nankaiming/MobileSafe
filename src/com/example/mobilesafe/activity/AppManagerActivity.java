@@ -2,11 +2,13 @@ package com.example.mobilesafe.activity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -37,6 +39,7 @@ import com.example.mobilesafe.bean.AppInfo;
 import com.example.mobilesafe.engine.AppInfos;
 import com.lidroid.xutils.ViewUtils;
 import com.lidroid.xutils.view.annotation.ViewInject;
+import com.stericson.RootShell.RootShell;
 import com.stericson.RootTools.RootTools;
 
 @SuppressLint("NewApi")
@@ -63,8 +66,21 @@ public class AppManagerActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		initUI();
 		initData();
+		receiver = new UninstallReceiver();
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+		intentFilter.addDataScheme("package");
+		registerReceiver(receiver, intentFilter);
 	}
+	class UninstallReceiver extends BroadcastReceiver{
 
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			initData();
+		}
+		
+	}
 	class AppManagerAdapter extends BaseAdapter {
 
 		@Override
@@ -180,6 +196,7 @@ public class AppManagerActivity extends Activity implements OnClickListener {
 			listView.setAdapter(adapter);
 		};
 	};
+	private UninstallReceiver receiver;
 
 	private void initData() {
 		// TODO Auto-generated method stub
@@ -297,6 +314,7 @@ public class AppManagerActivity extends Activity implements OnClickListener {
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		popupWindowDismiss();
+		unregisterReceiver(receiver);
 		super.onDestroy();
 	}
 
@@ -305,29 +323,30 @@ public class AppManagerActivity extends Activity implements OnClickListener {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
 		case R.id.ll_uninstall:
-			//用户应用可以直接删除
-			if (clickAppInfo.isUserApp()) {
+			// 用户应用可以直接删除
+//			if (clickAppInfo.isUserApp()) {
 				Intent uninstall_localIntent = new Intent(
 						"android.intent.action.DELETE", Uri.parse("package:"
 								+ clickAppInfo.getApkPackageName()));
 				startActivity(uninstall_localIntent);
-			}else{
-				if(!RootTools.isRootAvailable()){
-					Toast.makeText(this, "卸载系统应用，必须要root权限", 0).show();
-					return ;
-				}
-				try {
-					if(!RootTools.isAccessGiven()){
-						Toast.makeText(this, "请授权手机卫士root权限", 0).show();
-						return ;
-					}
-					RootTools.sendShell("mount -o remount ,rw /system", 3000);
-					RootTools.sendShell("rm -r "+clickAppInfo.getApkPath(), 30000);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+//			} else {
+//				if (!RootShell.isRootAvailable()) {
+//					Toast.makeText(this, "卸载系统应用，必须要root权限", 0).show();
+//					return;
+//				}
+//				try {
+//					if (!RootShell.isAccessGiven()) {
+//						Toast.makeText(this, "请授权手机卫士root权限", 0).show();
+//						return;
+//					}
+//					RootTools.getCustomShell("mount -o remount ,rw /system", 3000);
+//					RootTools.getCustomShell("rm -r " + clickAppInfo.getApkPath(),
+//							30000);
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
 			popupWindowDismiss();
 			break;
 		case R.id.ll_start:

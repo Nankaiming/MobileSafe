@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.Formatter;
@@ -22,6 +25,7 @@ import com.example.mobilesafe.R;
 import com.example.mobilesafe.bean.TaskInfo;
 import com.example.mobilesafe.engine.TaskInfoParser;
 import com.example.mobilesafe.utils.ServiceStatusUtils;
+import com.example.mobilesafe.utils.ToastUtils;
 import com.lidroid.xutils.ViewUtils;
 import com.lidroid.xutils.view.annotation.ViewInject;
 
@@ -35,8 +39,11 @@ public class TaskManagerActivity extends Activity {
 	private List<TaskInfo> taskInfos;
 	private List<TaskInfo> userTaskInfos;
 	private List<TaskInfo> systemAppInfos;
-	
+
 	private TaskManagerAdapter adapter;
+	private int processCount;
+	private long availMem;
+	private long totalMem;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,11 +52,12 @@ public class TaskManagerActivity extends Activity {
 		initUI();
 		initData();
 	}
+
 	@Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		if(adapter != null){
+		if (adapter != null) {
 			adapter.notifyDataSetChanged();
 		}
 	}
@@ -61,7 +69,15 @@ public class TaskManagerActivity extends Activity {
 			/**
 			 * 判断当前用户是否需要展示系统进程 如果需要就全部展示 如果不需要就展示用户进程
 			 */
+			SharedPreferences sp = getSharedPreferences("config",
+					Activity.MODE_PRIVATE);
+			boolean result = sp.getBoolean("is_show_system", false);
+			if (result) {
+
 				return userTaskInfos.size() + 1 + systemAppInfos.size() + 1;
+			} else {
+				return userTaskInfos.size() + 1;
+			}
 
 		}
 
@@ -179,6 +195,7 @@ public class TaskManagerActivity extends Activity {
 		}
 
 	}
+
 	static class ViewHolder {
 		ImageView iv_app_icon;
 		TextView tv_app_name;
@@ -190,8 +207,6 @@ public class TaskManagerActivity extends Activity {
 		// TODO Auto-generated method stub
 		new Thread() {
 
-			
-
 			public void run() {
 
 				taskInfos = TaskInfoParser
@@ -199,14 +214,13 @@ public class TaskManagerActivity extends Activity {
 				userTaskInfos = new ArrayList<TaskInfo>();
 				systemAppInfos = new ArrayList<TaskInfo>();
 				for (TaskInfo taskInfo : taskInfos) {
-					if(taskInfo.isUserApp()){
+					if (taskInfo.isUserApp()) {
 						userTaskInfos.add(taskInfo);
-					}else{
+					} else {
 						systemAppInfos.add(taskInfo);
 					}
 				}
 				runOnUiThread(new Runnable() {
-					
 
 					public void run() {
 
@@ -222,18 +236,15 @@ public class TaskManagerActivity extends Activity {
 		// TODO Auto-generated method stub
 		setContentView(R.layout.activity_task_manager);
 		ViewUtils.inject(this);
-		// 获取进程个数
-		int processCount = ServiceStatusUtils.getProcessCount(this);
+		processCount = ServiceStatusUtils.getProcessCount(this);
 		tv_task_process_count.setText("进程:" + processCount + "个");
-		// 获取进程可用内存
-		long availMem = ServiceStatusUtils.getAvailMem(this);
-		// 获取总内存
-		long totalMem = ServiceStatusUtils.getTotalMem(this);
+		availMem = ServiceStatusUtils.getAvailMem(this);
+		totalMem = ServiceStatusUtils.getTotalMem(this);
 		tv_task_memory.setText("剩余/总内存:"
 				+ Formatter.formatFileSize(TaskManagerActivity.this, availMem)
 				+ "/"
 				+ Formatter.formatFileSize(TaskManagerActivity.this, totalMem));
-		
+
 		list_view.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -247,11 +258,11 @@ public class TaskManagerActivity extends Activity {
 					TaskInfo taskInfo = (TaskInfo) object;
 
 					ViewHolder holder = (ViewHolder) view.getTag();
-					
-					if(taskInfo.getProcessName().equals(getPackageName())){
+
+					if (taskInfo.getProcessName().equals(getPackageName())) {
 						return;
 					}
-					
+
 					// 判断当前的item是否被勾选上
 					/**
 					 * 如果被勾选上了。那么就改成没有勾选。 如果没有勾选。就改成已经勾选
@@ -268,9 +279,10 @@ public class TaskManagerActivity extends Activity {
 			}
 		});
 	}
-	public void selectAll(View view){
+
+	public void selectAll(View view) {
 		for (TaskInfo taskInfo : userTaskInfos) {
-			if(taskInfo.getProcessName().equals(getPackageName())){
+			if (taskInfo.getProcessName().equals(getPackageName())) {
 				continue;
 			}
 			taskInfo.setChecked(true);
@@ -280,7 +292,8 @@ public class TaskManagerActivity extends Activity {
 		}
 		adapter.notifyDataSetChanged();
 	}
-	public void selectOppsite(View view){
+
+	public void selectOppsite(View view) {
 		for (TaskInfo taskInfo : userTaskInfos) {
 			// 判断当前的用户程序是不是自己的程序。如果是自己的程序。那么就把文本框隐藏
 
@@ -294,10 +307,59 @@ public class TaskManagerActivity extends Activity {
 		}
 		adapter.notifyDataSetChanged();
 	}
-	public void killProcess(View view){
-		
+
+	public void killProcess(View view) {
+		ActivityManager am = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
+		List<TaskInfo> list = new ArrayList<TaskInfo>();
+		// 释放的进程个数
+		int totalCount = 0;
+		// 释放的进程内存
+		long killMem = 0;
+		// 不能再集合迭代是改变集合大小或者删除增加
+		for (TaskInfo taskInfo : userTaskInfos) {
+			if (taskInfo.isChecked()) {
+				// 清理这个用户进程
+				totalCount++;
+				killMem += taskInfo.getMemorySize();
+				list.add(taskInfo);
+			}
+		}
+		for (TaskInfo taskInfo : systemAppInfos) {
+			if (taskInfo.isChecked()) {
+				// 清理这个系统进程
+				totalCount++;
+				killMem += taskInfo.getMemorySize();
+				list.add(taskInfo);
+			}
+		}
+		for (TaskInfo taskInfo : list) {
+			if (taskInfo.isUserApp()) {
+				am.killBackgroundProcesses(taskInfo.getProcessName());
+				userTaskInfos.remove(taskInfo);
+			} else {
+				am.killBackgroundProcesses(taskInfo.getProcessName());
+				systemAppInfos.remove(taskInfo);
+			}
+		}
+		ToastUtils.showToast(
+				this,
+				"共清理"
+						+ totalCount
+						+ "个进程,释放"
+						+ Formatter.formatFileSize(TaskManagerActivity.this,
+								killMem) + "内存");
+		processCount -= totalCount;
+		tv_task_process_count.setText("进程:" + processCount + "个");
+		tv_task_memory.setText("剩余/总内存:"
+				+ Formatter.formatFileSize(TaskManagerActivity.this, availMem
+						+ killMem) + "/"
+				+ Formatter.formatFileSize(TaskManagerActivity.this, totalMem));
+		adapter.notifyDataSetChanged();
+
 	}
-	public void openSetting(View view){
-		
+
+	public void openSetting(View view) {
+		Intent intent = new Intent(this, TaskManagerSettingActivity.class);
+		startActivity(intent);
 	}
 }
