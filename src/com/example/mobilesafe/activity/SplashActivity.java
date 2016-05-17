@@ -34,11 +34,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mobilesafe.R;
+import com.example.mobilesafe.bean.Virus;
+import com.example.mobilesafe.db.dao.AntivirusDao;
 import com.example.mobilesafe.utils.StreamUtil;
+import com.google.gson.Gson;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
+import com.lidroid.xutils.http.client.HttpRequest;
 
 public class SplashActivity extends Activity {
 
@@ -54,7 +58,7 @@ public class SplashActivity extends Activity {
 
 	private TextView tvVersion;
 
-	// ·şÎñÆ÷»ñÈ¡µÄĞÅÏ¢
+	// æœåŠ¡å™¨è·å–çš„ä¿¡æ¯
 	private String mVersionName;
 	private int mVersionCode;
 	private String mDescription;
@@ -67,15 +71,15 @@ public class SplashActivity extends Activity {
 				showUpdateDialog();
 				break;
 			case CODE_URL_ERROR:
-				Toast.makeText(SplashActivity.this, "url´íÎó", 0).show();
+				Toast.makeText(SplashActivity.this, "urlé”™è¯¯", 0).show();
 				entryHome();
 				break;
 			case CODE_NET_ERROR:
-				Toast.makeText(SplashActivity.this, "ÍøÂç´íÎó", 0).show();
+				Toast.makeText(SplashActivity.this, "ç½‘ç»œé”™è¯¯", 0).show();
 				entryHome();
 				break;
 			case CODE_JSON_ERROR:
-				Toast.makeText(SplashActivity.this, "Êı¾İ½âÎö´íÎó", 0).show();
+				Toast.makeText(SplashActivity.this, "æ•°æ®è§£æé”™è¯¯", 0).show();
 				entryHome();
 				break;
 			case CODE_ENTER_HOME:
@@ -91,6 +95,8 @@ public class SplashActivity extends Activity {
 
 	private RelativeLayout rtRoot;
 
+	private AntivirusDao dao;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -98,13 +104,15 @@ public class SplashActivity extends Activity {
 		setContentView(R.layout.activity_splash);
 
 		tvVersion = (TextView) findViewById(R.id.tv_version);
-		tvVersion.setText("°æ±¾ºÅ:" + getVersionName());
+		tvVersion.setText("ç‰ˆæœ¬å·:" + getVersionName());
 		tvProgress = (TextView) findViewById(R.id.tv_progress);
 		rtRoot = (RelativeLayout) findViewById(R.id.rt_root);
 
 		SharedPreferences mPrefs = getSharedPreferences("config", MODE_PRIVATE);
 
 		copyDB("address.db");
+		copyDB("antivirus.db");
+		updateAntivirus();
 
 		boolean autoUpdate = mPrefs.getBoolean("auto_update", true);
 		if (autoUpdate) {
@@ -119,8 +127,40 @@ public class SplashActivity extends Activity {
 
 	}
 
+	private void updateAntivirus() {
+		// TODO Auto-generated method stub
+		HttpUtils httpUtils = new HttpUtils();
+		String url = "http://10.0.2.2:8080/virus.json";
+		dao = new AntivirusDao();
+		httpUtils.send(HttpRequest.HttpMethod.GET, url,
+				new RequestCallBack<String>() {
+
+					@Override
+					public void onSuccess(ResponseInfo<String> responseInfo) {
+						try {
+//							JSONObject jsonObject = new JSONObject(responseInfo.result);
+//							String md5 = jsonObject.getString("md5");
+//							
+//							String desc = jsonObject.getString("desc");
+							Gson gson = new Gson();
+							Virus virus = gson.fromJson(responseInfo.result, Virus.class);
+							dao.addVirus(virus.md5, virus.desc);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+					}
+
+
+					@Override
+					public void onFailure(HttpException error, String msg) {
+					}
+				});
+	}
+
 	/**
-	 * »ñÈ¡µ±Ç°°æ±¾Ãû
+	 * è·å–å½“å‰ç‰ˆæœ¬å
 	 * 
 	 * @return
 	 */
@@ -142,7 +182,7 @@ public class SplashActivity extends Activity {
 	}
 
 	/**
-	 * »ñÈ¡µ±Ç°°æ±¾ºÅ
+	 * è·å–å½“å‰ç‰ˆæœ¬å·
 	 * 
 	 * @return
 	 */
@@ -164,7 +204,7 @@ public class SplashActivity extends Activity {
 	}
 
 	/**
-	 * ¼ì²éÊÇ·ñÓĞ¸üĞÂ°æ±¾
+	 * æ£€æŸ¥æ˜¯å¦æœ‰æ›´æ–°ç‰ˆæœ¬
 	 * 
 	 */
 	private void checkVersion() {
@@ -235,9 +275,9 @@ public class SplashActivity extends Activity {
 	private void showUpdateDialog() {
 		// TODO Auto-generated method stub
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("×îĞÂ°æ±¾:" + mVersionName);
+		builder.setTitle("æœ€æ–°ç‰ˆæœ¬:" + mVersionName);
 		builder.setMessage(mDescription);
-		builder.setPositiveButton("Á¢¼´¸üĞÂ", new OnClickListener() {
+		builder.setPositiveButton("ç«‹å³æ›´æ–°", new OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -245,7 +285,7 @@ public class SplashActivity extends Activity {
 				download();
 			}
 		});
-		builder.setNegativeButton("ÒÔºóÔÙËµ", new OnClickListener() {
+		builder.setNegativeButton("ä»¥åå†è¯´", new OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -270,7 +310,8 @@ public class SplashActivity extends Activity {
 		startActivity(intent);
 		finish();
 	}
-	//ÏÂÔØ×îĞÂ°æ±¾  ÓÃxutils¿ò¼Ü
+
+	// ä¸‹è½½æœ€æ–°ç‰ˆæœ¬ ç”¨xutilsæ¡†æ¶
 	private void download() {
 		// TODO Auto-generated method stub
 		tvProgress.setVisibility(View.VISIBLE);
@@ -285,7 +326,7 @@ public class SplashActivity extends Activity {
 						boolean isUploading) {
 					// TODO Auto-generated method stub
 					super.onLoading(total, current, isUploading);
-					tvProgress.setText("ÏÂÔØ½ø¶È" + (current * 100 / total) + "%");
+					tvProgress.setText("ä¸‹è½½è¿›åº¦" + (current * 100 / total) + "%");
 				}
 
 				@Override
@@ -301,44 +342,40 @@ public class SplashActivity extends Activity {
 				@Override
 				public void onFailure(HttpException arg0, String arg1) {
 					// TODO Auto-generated method stub
-					Toast.makeText(SplashActivity.this, "ÏÂÔØÊ§°Ü", 0).show();
+					Toast.makeText(SplashActivity.this, "ä¸‹è½½å¤±è´¥", 0).show();
 				}
 			});
 		} else {
-			Toast.makeText(SplashActivity.this, "Ã»ÓĞsdcard", 0).show();
+			Toast.makeText(SplashActivity.this, "æ²¡æœ‰sdcard", 0).show();
 		}
 
 	}
-	  
-	//´´½¨¿ì½İ·½Ê½
-	private void createShortcut(){
+
+	// åˆ›å»ºå¿«æ·æ–¹å¼
+	private void createShortcut() {
 		Intent intent = new Intent();
 		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
 		intent.putExtra("duplicate", false);
-		
+
 		/**
-		 * 1 ¸ÉÊ²Ã´ÊÂÇé
-		 * 2 Äã½ĞÊ²Ã´Ãû×Ö
-		 * 3Äã³¤³ÉÊ²Ã´Ñù×Ó
+		 * 1 å¹²ä»€ä¹ˆäº‹æƒ… 2 ä½ å«ä»€ä¹ˆåå­— 3ä½ é•¿æˆä»€ä¹ˆæ ·å­
 		 */
-		
-		
-		intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
-		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, "ÊÖ»úÎÀÊ¿");
-		
+
+		intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, BitmapFactory
+				.decodeResource(getResources(), R.drawable.ic_launcher));
+		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, "æ‰‹æœºå«å£«");
+
 		/**
-		 * Õâ¸öµØ·½²»ÄÜÊ¹ÓÃÏÔÊ¾ÒâÍ¼
-		 * ±ØĞëÊ¹ÓÃÒşÊ½ÒâÍ¼
+		 * è¿™ä¸ªåœ°æ–¹ä¸èƒ½ä½¿ç”¨æ˜¾ç¤ºæ„å›¾ å¿…é¡»ä½¿ç”¨éšå¼æ„å›¾
 		 */
-		
+
 		Intent shortIntent = new Intent();
 		shortIntent.setAction("home.welcome");
 		shortIntent.addCategory("android.intent.category.DEFAULT");
-		
-		
+
 		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortIntent);
 		sendBroadcast(intent);
-		
+
 	}
 
 	@Override
@@ -348,10 +385,10 @@ public class SplashActivity extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	//¿½±´Êı¾İ¿â  (¹éÊôµØ²éÑ¯Êı¾İ¿â)
+	// æ‹·è´æ•°æ®åº“ (å½’å±åœ°æŸ¥è¯¢æ•°æ®åº“)
 	private void copyDB(String dbName) {
 		File destFile = new File(getFilesDir(), dbName);
-		if(destFile.exists()){
+		if (destFile.exists()) {
 			return;
 		}
 		InputStream in = null;
@@ -361,17 +398,17 @@ public class SplashActivity extends Activity {
 			out = new FileOutputStream(destFile);
 			int len = 0;
 			byte[] buffer = new byte[1024];
-			while((len = in.read(buffer)) != -1){
+			while ((len = in.read(buffer)) != -1) {
 				out.write(buffer, 0, len);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}finally{
-			try{
+		} finally {
+			try {
 				in.close();
 				out.close();
-			}catch(Exception e){
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}

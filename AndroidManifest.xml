@@ -99,6 +99,10 @@
 
         <activity android:name="com.example.mobilesafe.activity.TaskManagerSettingActivity" >
         </activity>
+        <!-- 手机杀毒 -->
+
+        <activity android:name="com.example.mobilesafe.activity.AntivirusActivity" >
+        </activity>
 
         <!-- 开机广播 -->
         <receiver android:name="com.example.mobilesafe.receiver.BootCompletedReceiver" >
@@ -112,6 +116,23 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
+        <!-- 窗口小部件 -->
+        <receiver android:name="com.example.mobilesafe.receiver.MyAppWidget" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/example_appwidget_info" />
+        </receiver>
+        <!-- 杀死所有进程广播 -->
+        <receiver android:name="com.example.mobilesafe.receiver.KillProcessAllReceiver" >
+            <intent-filter>
+                <action android:name="com.example.mobilesafe" />
+            </intent-filter>
+        </receiver>
+
         <!-- 定位服务 -->
         <service android:name="com.example.mobilesafe.service.LocationService" >
         </service>
@@ -121,8 +142,11 @@
         <!-- 黑名单拦截 -->
         <service android:name="com.example.mobilesafe.service.CallSafeService" >
         </service>
-        <!-- 定时清理进程-->
+        <!-- 定时清理进程 -->
         <service android:name="com.example.mobilesafe.service.KillProcessService" >
+        </service>
+        <!-- 部件定时清理进程 -->
+        <service android:name="com.example.mobilesafe.service.KillProcesWidgetService" >
         </service>
     </application>
 
