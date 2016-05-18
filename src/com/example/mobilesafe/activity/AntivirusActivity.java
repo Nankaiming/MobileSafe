@@ -14,6 +14,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.mobilesafe.R;
@@ -31,6 +32,8 @@ public class AntivirusActivity extends Activity {
 	private LinearLayout ll_content;
 	@ViewInject(R.id.progressBar1)
 	private ProgressBar progressBar1;
+	@ViewInject(R.id.scrollView)
+	private ScrollView scrollView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,15 @@ public class AntivirusActivity extends Activity {
 					textView.setTextColor(Color.BLACK);
 				}
 				ll_content.addView(textView);
+				scrollView.post(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						scrollView.fullScroll(ScrollView.FOCUS_DOWN);
+						
+					}
+				});
 				break;
 			case FINISHED:
 				iv_scanning.clearAnimation();

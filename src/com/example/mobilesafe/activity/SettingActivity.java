@@ -12,6 +12,7 @@ import android.view.View.OnClickListener;
 import com.example.mobilesafe.R;
 import com.example.mobilesafe.service.AddressService;
 import com.example.mobilesafe.service.CallSafeService;
+import com.example.mobilesafe.service.WatchDogService;
 import com.example.mobilesafe.utils.ServiceStatusUtils;
 import com.example.mobilesafe.view.SettingClickView;
 import com.example.mobilesafe.view.SettingItemView;
@@ -21,6 +22,7 @@ public class SettingActivity extends Activity {
 	private SharedPreferences mPrefs;
 	private SettingItemView siv_address;
 	private SettingItemView siv_black;
+	private SettingItemView siv_watch_dog;
 	private SettingClickView scvAddressStyle;
 
 	@Override
@@ -34,6 +36,7 @@ public class SettingActivity extends Activity {
 		initAddressStyle();
 		initAddressLocation();
 		initBlackView();
+		initWatchDogView();
 	}
 
 	// 设置是否自动更新
@@ -99,6 +102,27 @@ public class SettingActivity extends Activity {
 					siv_black.setChecked(true);
 					startService(new Intent(SettingActivity.this,
 							CallSafeService.class));
+				}
+			}
+		});
+	}
+	private void initWatchDogView() {
+		siv_watch_dog = (SettingItemView) findViewById(R.id.siv_watch_dog);
+		
+		siv_watch_dog.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				// TODO Auto-generated method stub
+				if (siv_watch_dog.isChecked()) {
+					siv_watch_dog.setChecked(false);
+					stopService(new Intent(SettingActivity.this,
+							WatchDogService.class));
+				} else {
+					siv_watch_dog.setChecked(true);
+					startService(new Intent(SettingActivity.this,
+							WatchDogService.class));
 				}
 			}
 		});
@@ -176,6 +200,13 @@ public class SettingActivity extends Activity {
 			siv_black.setChecked(true);
 		} else {
 			siv_black.setChecked(false);
+		}
+		isRunning = ServiceStatusUtils.isServiceRunning(this,
+				"com.example.mobilesafe.service.WatchDogService");
+		if (isRunning) {
+			siv_watch_dog.setChecked(true);
+		} else {
+			siv_watch_dog.setChecked(false);
 		}
 		super.onStart();
 	}

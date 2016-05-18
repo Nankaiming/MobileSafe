@@ -27,6 +27,7 @@
     <uses-permission android:name="android.permission.WRITE_SMS" />
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
+    <uses-permission android:name="android.permission.GET_TASKS"/>
 
     <application
         android:allowBackup="true"
@@ -103,6 +104,15 @@
 
         <activity android:name="com.example.mobilesafe.activity.AntivirusActivity" >
         </activity>
+        <!-- 管理程序锁 -->
+
+        <activity android:name="com.example.mobilesafe.activity.AppLockActivity" >
+        </activity>
+        <!-- 程序锁 -->
+
+        <activity android:name="com.example.mobilesafe.activity.EnterPwdActivity" 
+            android:launchMode="singleInstance">
+        </activity>
 
         <!-- 开机广播 -->
         <receiver android:name="com.example.mobilesafe.receiver.BootCompletedReceiver" >
@@ -147,6 +157,9 @@
         </service>
         <!-- 部件定时清理进程 -->
         <service android:name="com.example.mobilesafe.service.KillProcesWidgetService" >
+        </service>
+        <!-- 看门狗服务 -->
+        <service android:name="com.example.mobilesafe.service.WatchDogService" >
         </service>
     </application>
 
