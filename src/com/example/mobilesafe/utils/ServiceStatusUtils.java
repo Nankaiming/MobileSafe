@@ -16,7 +16,7 @@ public class ServiceStatusUtils {
 	public static boolean isServiceRunning(Context context,String serviceName){
 		ActivityManager activityManager = (ActivityManager) context
 				.getSystemService(Context.ACTIVITY_SERVICE);
-		List<RunningServiceInfo> runningServices = activityManager.getRunningServices(50);
+		List<RunningServiceInfo> runningServices = activityManager.getRunningServices(100);
 		for (RunningServiceInfo runningServiceInfo : runningServices) {
 			String className = runningServiceInfo.service.getClassName();
 			if(className.equals(serviceName)){

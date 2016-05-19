@@ -37,6 +37,12 @@ public class SettingActivity extends Activity {
 		initAddressLocation();
 		initBlackView();
 		initWatchDogView();
+		if (ServiceStatusUtils.isServiceRunning(this,
+				"com.example.mobilesafe.service.WatchDogService")) {
+			siv_watch_dog.setChecked(true);
+		} else {
+			siv_watch_dog.setChecked(false);
+		}
 	}
 
 	// 设置是否自动更新

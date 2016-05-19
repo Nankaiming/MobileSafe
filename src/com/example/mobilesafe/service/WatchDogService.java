@@ -137,7 +137,7 @@ public class WatchDogService extends Service {
 
 //					System.out.println(packageName);
 					// 让狗休息一会
-					SystemClock.sleep(30);
+//					SystemClock.sleep(1000);
 					// 直接从数据库里面查找当前的数据
 					// 这个可以优化。改成从内存当中寻找
 					if (appLockInfos.contains(packageName)) {

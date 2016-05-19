@@ -34,6 +34,7 @@ public class EnterPwdActivity extends Activity implements OnClickListener{
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_set_pwd);
+		System.out.println("sssssactivity++++create");
 		initUI();
 	}
 
@@ -225,5 +226,10 @@ public class EnterPwdActivity extends Activity implements OnClickListener{
 		intent.addCategory("android.intent.category.DEFAULT");
 		intent.addCategory("android.intent.category.MONKEY");
 		startActivity(intent);
+		finish();
 	}
+	
+	
+	
+	
 }
