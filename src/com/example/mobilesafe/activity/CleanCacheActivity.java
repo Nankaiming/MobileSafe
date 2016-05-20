@@ -13,9 +13,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.text.format.Formatter;
@@ -34,8 +34,6 @@ public class CleanCacheActivity extends Activity {
 	private ListView list_view;
 	private List<CatchInfo> catchInfos;
 	private CatchAdapter adapter;
-	private int i = 0;
-	private int size;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,14 +57,6 @@ public class CleanCacheActivity extends Activity {
 		list_view = (ListView) findViewById(R.id.list_view);
 
 	}
-
-	private Handler handler = new Handler() {
-
-		public void handleMessage(android.os.Message msg) {
-			adapter = new CatchAdapter();
-			list_view.setAdapter(adapter);
-		};
-	};
 
 	class CatchAdapter extends BaseAdapter {
 
@@ -120,7 +110,7 @@ public class CleanCacheActivity extends Activity {
 					// TODO Auto-generated method stub
 					Intent intent = new Intent();
 					intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
-					intent.setData(Uri.parse("package://"
+					intent.setData(Uri.parse("package:"
 							+ catchInfo.packageName));
 					intent.addCategory(Intent.CATEGORY_DEFAULT);
 					startActivity(intent);
@@ -130,6 +120,13 @@ public class CleanCacheActivity extends Activity {
 		}
 
 	}
+
+	private Handler handler = new Handler() {
+		public void handleMessage(android.os.Message msg) {
+			adapter = new CatchAdapter();
+			list_view.setAdapter(adapter);
+		};
+	};
 
 	static class ViewHolder {
 		ImageView iv_icon;
@@ -147,11 +144,11 @@ public class CleanCacheActivity extends Activity {
 				// 安装到手机上面所有的应用程序
 				List<PackageInfo> installedPackages = packageManager
 						.getInstalledPackages(0);
-				size = installedPackages.size();
 				for (PackageInfo packageInfo : installedPackages) {
 					getCacheSize(packageInfo);
 				}
-
+				SystemClock.sleep(5000);
+				handler.sendEmptyMessage(0);
 			};
 		}.start();
 	}
@@ -213,31 +210,24 @@ public class CleanCacheActivity extends Activity {
 		public void onGetStatsCompleted(PackageStats pStats, boolean succeeded)
 				throws RemoteException {
 			// TODO Auto-generated method stub
-			synchronized (CleanCacheActivity.class) {
-				i++;
-
-				long catchSize = pStats.cacheSize;
-				if (catchSize > 0) {
-					CatchInfo catchInfo = new CatchInfo();
-					Drawable icon = packageInfo.applicationInfo
-							.loadIcon(packageManager);
-					catchInfo.icon = icon;
-					String appName = packageInfo.applicationInfo.loadLabel(
-							packageManager).toString();
-					catchInfo.appName = appName;
-					catchInfo.catchSize = catchSize;
-					String packageName = packageInfo.packageName;
-					catchInfo.packageName = packageName;
-					catchInfos.add(catchInfo);
-
-				}
-				if (i == size) {
-					handler.sendEmptyMessage(0);
-				}
+			long catchSize = pStats.cacheSize;
+			if (catchSize > 0) {
+				CatchInfo catchInfo = new CatchInfo();
+				Drawable icon = packageInfo.applicationInfo
+						.loadIcon(packageManager);
+				catchInfo.icon = icon;
+				String appName = packageInfo.applicationInfo.loadLabel(
+						packageManager).toString();
+				catchInfo.appName = appName;
+				catchInfo.catchSize = catchSize;
+				String packageName = packageInfo.packageName;
+				catchInfo.packageName = packageName;
+				catchInfos.add(catchInfo);
 			}
-
 		}
 
 	}
+
+	
 
 }
